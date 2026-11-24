@@ -1,0 +1,39 @@
+
+name: Build APK
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download project
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Extract project ZIP
+        run: |
+          unzip -o discordapk.zip -d project
+          find project -name settings.gradle.kts -print
+
+      - name: Build APK
+        run: |
+          cd project/discordapk
+          gradle assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-android-apk
+          path: project/discordapk/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          
